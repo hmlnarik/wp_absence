@@ -194,7 +194,23 @@ class School_Absence {
 
 
     public function register_admin_menu() {
-        add_menu_page("Absence", "Absence", ABSENCE_CAP_UPDATE_ALL_CHILDREN, PAGE_MANAGE_CHILDREN, array($this->childrenAdmin, 'admin_page_children'));
+        global $wpdb;
+        
+        $children_waiting = $wpdb->get_row("SELECT COUNT(DISTINCT id) FROM " . ABSENCE_TABLE_CHILD 
+            . " c WHERE NOT EXISTS (SELECT 1 FROM " . ABSENCE_TABLE_CHILD_CLASS . " WHERE fk_" . ABSENCE_TABLE_CHILD . " = c.ID)", ARRAY_N)[0];
+        if ($children_waiting) {
+            $search_args = array(
+                    's_cat' => -1,
+                    'page' => PAGE_MANAGE_CHILDREN
+            );
+            $a = add_query_arg( $search_args, 'admin.php' );
+
+            $title = sprintf('Absence <span onclick="window.location.href = \'%s\'; return false" class="awaiting-mod">%d</span>', $a, $children_waiting);
+        } else {
+            $title = 'Absence';
+        }
+        
+        add_menu_page("Absence", $title, ABSENCE_CAP_UPDATE_ALL_CHILDREN, PAGE_MANAGE_CHILDREN, array($this->childrenAdmin, 'admin_page_children'));
         add_submenu_page(PAGE_MANAGE_CHILDREN, "Kalendář zadaných absencí", "Kalendář", ABSENCE_CAP_UPDATE_ALL_CHILDREN, PAGE_CALENDAR, array($this->adminCalendar, 'display'));
     }    
 }
