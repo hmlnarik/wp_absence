@@ -2,10 +2,10 @@
 
 defined( 'ABSPATH' ) or die( 'Nope, not accessing this' );
 
-ini_set('display_startup_errors', 1);
-ini_set('display_errors', 1);
-error_reporting(-1);
-//error_reporting(0);
+//ini_set('display_startup_errors', 1);
+//ini_set('display_errors', 1);
+//error_reporting(-1);
+error_reporting(0);
 
 require_once( ABSPATH . 'wp-admin/includes/admin.php' );
 
