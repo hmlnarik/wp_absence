@@ -36,12 +36,21 @@ class School_Absence_Admin_Child_Detail {
             wp_send_json_error('Vyberte alespoň jedno datum', 400);
         }
 
-        if (! (current_user_can(ABSENCE_CAP_UPDATE_ALL_CHILDREN) || 
-            (current_user_can(ABSENCE_CAP_UPDATE_OWN_CHILDREN) && $this->is_current_user_parent_of($child_id)))) {
+        if (current_user_can(ABSENCE_CAP_UPDATE_OWN_CHILDREN) && $this->is_current_user_parent_of($child_id)) {
+            // Must not update dates from the past
+            $d = explode(',', $dates);
+            $minDate = min($d);
+            $today = date("Ymd");
+            if ($minDate < $today) {
+                wp_send_json_error('Na webu nelze upravovat data v minulosti.', 400);
+            }
+        } else if (current_user_can(ABSENCE_CAP_UPDATE_ALL_CHILDREN)) {
+            $d = explode(',', $dates);
+        } else {
             wp_send_json_error('Unauthorized.', 403);
         }
         
-        foreach (explode(',', $dates) as $date) {
+        foreach ($d as $date) {
             $wpdb->replace(ABSENCE_TABLE_DATE, array(
                 'date' => $date,
                 'type' => $kind,
