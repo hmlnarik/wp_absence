@@ -48,6 +48,7 @@ define ('ABSENCE_TABLE_CHILD_CLASS', $wpdb->prefix . "absence_child_class");
 define ('ABSENCE_TABLE_DATE', $wpdb->prefix . "absence_date");
 
 define ('ABSENCE_KIND_ABSENT', 'A');
+define ('ABSENCE_KIND_ABSENT_LATE', 'B');
 define ('ABSENCE_KIND_LUNCH', 'L');
 define ('ABSENCE_KIND_PRESENT', 'N');
 

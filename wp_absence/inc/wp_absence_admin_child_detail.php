@@ -46,19 +46,34 @@ class School_Absence_Admin_Child_Detail {
             }
         } else if (current_user_can(ABSENCE_CAP_UPDATE_ALL_CHILDREN)) {
             $d = explode(',', $dates);
+            $minDate = min($d);
         } else {
             wp_send_json_error('Unauthorized.', 403);
         }
         
         foreach ($d as $date) {
+            $k = ($kind == ABSENCE_KIND_ABSENT && $date == $minDate && $this->is_late($date)) ? ABSENCE_KIND_ABSENT_LATE : $kind;
             $wpdb->replace(ABSENCE_TABLE_DATE, array(
                 'date' => $date,
-                'type' => $kind,
+                'type' => $k,
                 'fk_' . ABSENCE_TABLE_CHILD => $child_id
             ));
         }
         
         $this->absence_ajax_get_child_absences();
+    }
+    
+    function is_late($date) {
+        if (date("H") < 13) {   // After 13:00
+            return false;
+        }
+        $weekday = date("N");
+        if ($weekday < 5) {
+            $next_workday = date('Ymd', strtotime('+1 day'));
+        } else {
+            $next_workday = date('Ymd', strtotime('next Monday'));
+        }
+        return $date == $next_workday;
     }
     
     function is_current_user_parent_of($child_id) {

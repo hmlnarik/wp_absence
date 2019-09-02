@@ -191,6 +191,18 @@ button.datepick-cmd {
 .datepick-month td .datepick-A, .datepick-A {
 	background-color: #ff9999;
 }
+.absent-child.datepick-B {
+	background-color: #ff9999;
+        background-image: none;
+}
+.absent-child.datepick-B:after {
+        content: " [po uzávěrce jídelny]";
+        font-weight: bold;
+        font-size: smaller;
+}
+.datepick-month td .datepick-B, .datepick-B {
+	background-image: url(../img/bg-absent-late.png);
+}
 .datepick-month td .datepick-L, .datepick-L {
 	background-color: #99ff99;
 }
