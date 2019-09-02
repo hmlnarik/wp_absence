@@ -68,6 +68,12 @@ class School_Absence {
         
         add_filter('wp_nav_menu_items', array($this, 'direct_menu_logout_link'), 10, 2);
         
+        if(is_admin()) {
+            add_action('pre_get_posts', array($this, 'query_post_add_gallery_filter'));
+            add_filter('parse_query', array($this, 'parse_query_admin_post_add_gallery_filter'));
+            add_filter('restrict_manage_posts', array($this, 'display_admin_post_gallery_filter'));
+        }
+
         $this->adminCalendar = new School_Absence_Admin_Calendar();
         $this->childrenAdmin = new School_Absence_Admin_Children();
         $widget = new School_Absence_Widget();
@@ -86,7 +92,33 @@ class School_Absence {
 
         return $nav . $logoutlink;
     }
+    
+    public function the_gallery_filter_where($where = '', &$wp_query) {
+        if ($wp_query->get('gallery_only' ) == 'true') {
+            $where .= " AND trim(coalesce(post_content, '')) RLIKE '\\\\[ngg_images'";
+        }
+        return $where;
+    }
 
+    public function display_admin_post_gallery_filter() {
+        echo('<input type="checkbox" name="gallery_only" value="true"'
+          . ($_GET['gallery_only'] === 'true' ? ' checked' : '')
+          . '><label for="gallery_only">');
+        _e("S fotogalerií");
+        echo('</label>');
+    }
+
+    public function query_post_add_gallery_filter() {
+        add_filter('posts_where', array($this, 'the_gallery_filter_where'), 10, 2);
+    }
+    
+    function parse_query_admin_post_add_gallery_filter( &$query ) {
+        global $pagenow;
+        if (is_admin() && $pagenow == 'edit.php' && isset($_GET['gallery_only'])) {
+            $query->set('gallery_only', $_GET['gallery_only']);
+        }
+    }
+    
     //triggered on activation of the plugin (called only once)
     public function plugin_activate() {
         flush_rewrite_rules();
