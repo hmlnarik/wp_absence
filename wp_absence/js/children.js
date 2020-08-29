@@ -40,7 +40,7 @@ function submitAbsence(kind) {
     };
     jQuery("#calendar-spinner").css('visibility', 'visible')
     jQuery.post(ajaxurl, data, updateDates)
-      .fail(function() { alert("Došlo k chybě při spojení nebo zadání. Zkontrolujte zadané údaje a zkuste to znovu."); })
+      .fail(failAjax)
       .always(function() { jQuery("#calendar-spinner").css('visibility', 'hidden'); });
 }
 
