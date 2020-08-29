@@ -64,16 +64,11 @@ class School_Absence_Admin_Child_Detail {
     }
     
     function is_late($date) {
-        if (date("H") < 13) {   // After 13:00
-            return false;
-        }
-        $weekday = date("N");
-        if ($weekday < 5) {
-            $next_workday = date('Ymd', strtotime('+1 day'));
-        } else {
-            $next_workday = date('Ymd', strtotime('next Monday'));
-        }
-        return $date == $next_workday;
+        $today = date("Ymd");
+        $lt = localtime();
+        return 
+            ($date < $today) ||
+            (($date == $today) && ($lt[2] > 8 || $lt[2] == 8 && $lt[1] > 5));   // after 8:05 is too late
     }
     
     function is_current_user_parent_of($child_id) {

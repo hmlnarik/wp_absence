@@ -133,11 +133,6 @@ EOD
                 . ' <button disabled="true" class="abs datepick-' . ABSENCE_KIND_PRESENT . '" onclick="submitAbsence(\'' . ABSENCE_KIND_PRESENT . '\')">Přítomno</button>' . <<<EOD
             </li>
         </ol>
-        <p>
-            Přítomnost dítěte lze omluvit do konce předchozího dne, ale stravování je nutné omluvit do 13:00
-            předchozího pracovního dne. Pokud omluvíte dítě později než ve 13:00,
-            bude příslušné datum zobrazeno takto: <span class="datepick-B" style="width: 3em; display: inline-block;">&nbsp;</span>.
-        </p>
 EOD;
     }
 }
