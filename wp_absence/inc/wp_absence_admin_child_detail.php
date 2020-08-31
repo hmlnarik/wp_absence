@@ -20,6 +20,8 @@ class School_Absence_Admin_Child_Detail {
         $this->child_id = $child_id;
         
         wp_enqueue_script( 'post' );
+
+        date_default_timezone_set('Europe/Prague');
     }
 
     function absence_ajax_update_child_absences() {
@@ -41,7 +43,7 @@ class School_Absence_Admin_Child_Detail {
             $d = explode(',', $dates);
             $minDate = min($d);
             $today = date("Ymd");
-            if ($minDate <= $today) {
+            if ($minDate < $today) {
                 wp_send_json_error('Na webu lze upravovat jen data v budoucnosti.', 400);
             }
         } else if (current_user_can(ABSENCE_CAP_UPDATE_ALL_CHILDREN)) {
