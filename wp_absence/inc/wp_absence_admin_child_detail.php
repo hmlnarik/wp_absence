@@ -54,6 +54,7 @@ class School_Absence_Admin_Child_Detail {
         }
         
         foreach ($d as $date) {
+            // $minDate >= $today holds always due to condition above
             $k = ($kind == ABSENCE_KIND_ABSENT && $date == $minDate && $this->is_late($date)) ? ABSENCE_KIND_ABSENT_LATE : $kind;
             $wpdb->replace(ABSENCE_TABLE_DATE, array(
                 'date' => $date,
@@ -65,12 +66,40 @@ class School_Absence_Admin_Child_Detail {
         $this->absence_ajax_get_child_absences();
     }
     
+    // For the date that is either today or in the future, checks if it is too late to change $date
     function is_late($date) {
+//        return $this->is_late_same_day($date, 8, 5);
+        return $this->is_late_previous_workday($date, 13);
+    }
+    
+    function is_late_previous_workday($date, $limit_hour) {
+        $today = date("Ymd");
+        $lt = localtime();
+        
+        // If the date is today, it is already too late
+        if ($date == $today) {
+            return true;
+        }
+        // If the date is after today, then check the hour. Before the limit hour, it is NOT too late
+        if ($lt[2] < $limit_hour) {
+            return false;
+        }
+        // After 13:00, "late" is if the $date is the next work day
+        $weekday = date("N");
+        if ($weekday < 5) {           // Mon - Thu
+            $next_workday = date('Ymd', strtotime('+1 day'));
+        } else {
+            $next_workday = date('Ymd', strtotime('next Monday'));
+        }
+        return $date == $next_workday;
+    }
+    
+    function is_late_same_day($date, $limit_hour, $allow_mins) {
         $today = date("Ymd");
         $lt = localtime();
         return 
             ($date < $today) ||
-            (($date == $today) && ($lt[2] > 8 || $lt[2] == 8 && $lt[1] > 5));   // after 8:05 is too late
+            (($date == $today) && ($lt[2] > $limit_hour || $lt[2] == $limit_hour && $lt[1] > $allow_mins));   // after 8:05 is too late
     }
     
     function is_current_user_parent_of($child_id) {
