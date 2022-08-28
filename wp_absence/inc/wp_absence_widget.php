@@ -17,6 +17,36 @@ class School_Absence_Widget extends WP_widget {
         );
         add_action('init', array($this, 'register_shortcodes'));
         add_action('wp_ajax_absence_ajax_create_child', array($this, 'absence_ajax_create_child'));
+
+        // Parents without children in "List users" view
+        add_action('views_users', function($views) {
+            global $role;
+            $current_link_attributes = '';
+            $this_role = "parents-without-reg-children";
+            if ( $this_role === $role ) {
+                $current_link_attributes = ' class="current" aria-current="page"';
+            }
+            $views[$this_role] = "<a href='" . esc_url( add_query_arg( 'role', $this_role, 'users.php') ) . "'$current_link_attributes>Rodiče bez registrovaných dětí</a>";
+            return $views;
+        });
+        add_action('users_list_table_query_args', function($args) {
+            if ($args['role'] == 'parents-without-reg-children') {
+                $args['role'] = 'parent';
+            }
+
+            return $args;
+        });
+        add_action('pre_user_query', function($query) {
+            global $role, $wpdb;
+            if ("parents-without-reg-children" === $role) {
+                $query->query_where = str_replace(
+                    'WHERE 1=1', 
+                    "WHERE 1=1 AND NOT EXISTS (SELECT 1 FROM wp_absence_child c WHERE c.fk_wp_users = {$wpdb->users}.id)", 
+                    $query->query_where
+                );
+            }
+        });
+        // Parents without children in "List users" view end here
     }
 
     public function register_shortcodes() {
