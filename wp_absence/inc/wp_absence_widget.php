@@ -47,6 +47,43 @@ class School_Absence_Widget extends WP_widget {
             }
         });
         // Parents without children in "List users" view end here
+        
+        // Antispam
+        add_action('lrm/pre_register_new_user', function() {
+            if (! isset($_POST['exp-checksum']) || ! isset($_POST['checksum'])) {
+                wp_send_json_error(array('message' => 'Chybný součet', 'for' => 'signup-checksum'));
+            }
+            if (strlen($_POST['exp-checksum']) > 2 || strlen($_POST['checksum']) > 1) {
+                wp_send_json_error(array('message' => 'Chybný součet', 'for' => 'signup-checksum'));
+            }
+            if (! ctype_digit($_POST['exp-checksum']) || ! ctype_digit($_POST['checksum'])) {
+                wp_send_json_error(array('message' => 'Chybný součet', 'for' => 'signup-checksum'));
+            }
+            
+            $a = intdiv($_POST['exp-checksum'], 7);
+            $b = (int) ($_POST['exp-checksum'] % 7);
+            if ((int) $_POST['checksum'] !== ($a + $b)) {
+                wp_send_json_error(array('message' => 'Chybný součet', 'for' => 'signup-checksum'));
+            }
+        });
+        add_action('lrm/register_form', function() {
+            $a = rand(1,4);
+            $b = rand(1,5);
+            $cislice = ['nula', 'jedna', 'dva', 'tři', 'čtyři', 'pět'];
+            $checksum_label = "Uveďte číslem, kolik je $cislice[$a] a $cislice[$b]:";
+            ?>
+                <div class="fieldset">
+                    <div class="lrm-position-relative">
+                        <span>Kontrola proti spamu: </span>
+                        <label for="signup-checksum" title="<?= $checksum_label; ?>"><?= $checksum_label ?></label>
+                        <input name="checksum" class="full-width has-padding has-border" id="signup-checksum" type="number" placeholder="Součet" <?= $fields_required; ?> autocomplete="off" aria-label="<?= $email_label; ?>">
+                        <input name="exp-checksum" type="hidden" value="<?= 7 * $a + $b; ?>">
+                        <span class="lrm-error-message"></span>
+                    </div>
+                </div>
+            <?php
+        });
+        // Antispam ends here
     }
 
     public function register_shortcodes() {
